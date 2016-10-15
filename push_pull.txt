@@ -1,0 +1,7 @@
+win:
+git push pi1 master
+password: raspberry
+
+pi:
+cd /home/pi/repoEmbeddedOS.git/hooks
+./post-receive
