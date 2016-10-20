@@ -107,7 +107,7 @@ void write_gpio(volatile uint32_t* paddr, uint32_t value)
 
 void set_gpio(uint8_t pin)
 {
-	volatile uint32_t* paddr = bcm2835_gpio + BCM2835_GPSET0 / 4 + pin / 32;
+	volatile uint32_t* paddr = gpio + BCM2835_GPSET0 / 4 + pin / 32;
 	uint8_t shift = pin % 32;
 	bcm2835_peri_write(paddr, 1 << shift);
 }
