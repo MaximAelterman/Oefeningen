@@ -43,7 +43,7 @@ uint32_t *peripherals_base = (uint32_t *) PERI_BASE;
 void initpins(uint8_t);
 void init();
 static void *mapmem(const char*, size_t, int, off_t);
-void write(volatile uint32_t*, uint32_t);
+void write_gpio(volatile uint32_t*, uint32_t);
 
 int main(int argc, char **argv)
 {
@@ -56,9 +56,9 @@ int main(int argc, char **argv)
     // Blink
     while (1)
     {
-		write(pin, 0x1);			//pin hoog maken
+		write_gpio(pin, 0x1);			//pin hoog maken
 		bcm2835_delay(500);
-		write(pin, 0x0);			//pin laag maken
+		write_gpio(pin, 0x0);			//pin laag maken
 		bcm2835_delay(500);
     }
     bcm2835_close();
@@ -92,7 +92,7 @@ static void *mapmem(const char *msg, size_t size, int fd, off_t off)
 	void *map = mmap(NULL, size, (PROT_READ | PROT_WRITE), MAP_SHARED, fd, off);
 }
 
-void write(volatile uint32_t* paddr, uint32_t value)
+void write_gpio(volatile uint32_t* paddr, uint32_t value)
 {
 	__sync_synchronize();
 	*paddr = value;

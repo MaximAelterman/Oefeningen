@@ -5,3 +5,5 @@ password: raspberry
 pi:
 cd /home/pi/repoEmbeddedOS.git/hooks
 ./post-receive
+
+cd /home/pi/embeddedOS
