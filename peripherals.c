@@ -32,7 +32,7 @@
 #define PERI_BASE 0x20000000
 #define GPIO_BASE 0x200000
 
-#define PIN1 RPI_V2_GPIO_P1_11
+#define PIN1 17
 
 #define AANTAL_PINS 8
 
@@ -40,7 +40,7 @@ volatile uint32_t gpio;
 uint32_t peripherals;
 uint32_t *peripherals_base = (uint32_t *) PERI_BASE;
 
-void initpins(uint8_t pin);
+void initpins(uint8_t);
 void init();
 
 int main(int argc, char **argv)
@@ -48,12 +48,15 @@ int main(int argc, char **argv)
     if (!bcm2835_init())
       return 1;
     // Set the pin to be an output
-    uint8_t pins = PIN1;
+    uint8_t pin = PIN1;
     initpins(pin);
     // Blink
     while (1)
     {
-        
+		bcm2835_gpio_write(pin, 0x1);
+		bcm2835_delay(500);
+		bcm2835_gpio_write(pin, 0x0);
+		bcm2835_delay(500);
     }
     bcm2835_close();
     return 0;
@@ -61,7 +64,7 @@ int main(int argc, char **argv)
 
 void initpins(uint8_t pin)
 {
-	//bcm2835_gpio_fsel(pin], BCM2835_GPIO_FSEL_OUTP);
+	bcm2835_gpio_fsel(pin, 0x01);
 }
 
 void init()
