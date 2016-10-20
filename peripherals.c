@@ -39,7 +39,7 @@
 #define AANTAL_PINS 8
 
 volatile uint32_t *gpio;
-uint32_t peripherals;
+uint32_t *peripherals;
 uint32_t *peripherals_base = (uint32_t *) PERI_BASE;
 
 void initpins(uint8_t);
