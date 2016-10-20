@@ -45,9 +45,9 @@ uint32_t *peripherals_base = (uint32_t *) PERI_BASE;
 void initpins(uint8_t);
 void init();
 static void *mapmem(const char*, size_t, int, off_t);
-void write_gpio(volatile uint32_t*, uint32_t);
-void set_gpio(uint8_t pin)
-void clear_gpio(uint8_t pin)
+//void write_gpio(volatile uint32_t*, uint32_t);
+void set_gpio(uint8_t pin);
+void clear_gpio(uint8_t pin);
 
 int main(int argc, char **argv)
 {
