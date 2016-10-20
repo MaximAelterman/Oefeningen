@@ -43,20 +43,22 @@ uint32_t *peripherals_base = (uint32_t *) PERI_BASE;
 void initpins(uint8_t);
 void init();
 static void *mapmem(const char*, size_t, int, off_t);
+void write(volatile uint32_t*, uint32_t);
 
 int main(int argc, char **argv)
 {
     if (!bcm2835_init())
       return 1;
+	init();
     // Set the pin to be an output
     uint8_t pin = PIN1;
     initpins(pin);
     // Blink
     while (1)
     {
-		bcm2835_gpio_write(pin, 0x1);
+		write(pin, 0x1);			//pin hoog maken
 		bcm2835_delay(500);
-		bcm2835_gpio_write(pin, 0x0);
+		write(pin, 0x0);			//pin laag maken
 		bcm2835_delay(500);
     }
     bcm2835_close();
@@ -88,4 +90,11 @@ exit:
 static void *mapmem(const char *msg, size_t size, int fd, off_t off)
 {
 	void *map = mmap(NULL, size, (PROT_READ | PROT_WRITE), MAP_SHARED, fd, off);
+}
+
+void write(volatile uint32_t* paddr, uint32_t value)
+{
+	__sync_synchronize();
+	*paddr = value;
+	__sync_synchronize();
 }
