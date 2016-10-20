@@ -42,6 +42,7 @@ uint32_t *peripherals_base = (uint32_t *) PERI_BASE;
 
 void initpins(uint8_t);
 void init();
+static void *mapmem(const char*, size_t, int, off_t);
 
 int main(int argc, char **argv)
 {
@@ -82,4 +83,9 @@ void init()
 	}
 exit:
 	return;
+}
+
+static void *mapmem(const char *msg, size_t size, int fd, off_t off)
+{
+	void *map = mmap(NULL, size, (PROT_READ | PROT_WRITE), MAP_SHARED, fd, off);
 }
