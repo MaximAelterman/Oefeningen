@@ -31,12 +31,14 @@
 
 #define PERI_BASE 0x20000000
 #define GPIO_BASE 0x200000
+#define BCM2835_GPSET0 0x001c
+#define BCM2835_GPCLR0 0x0028
 
 #define PIN1 17
 
 #define AANTAL_PINS 8
 
-volatile uint32_t gpio;
+volatile uint32_t *gpio;
 uint32_t peripherals;
 uint32_t *peripherals_base = (uint32_t *) PERI_BASE;
 
@@ -44,6 +46,8 @@ void initpins(uint8_t);
 void init();
 static void *mapmem(const char*, size_t, int, off_t);
 void write_gpio(volatile uint32_t*, uint32_t);
+void set_gpio(uint8_t pin)
+void clear_gpio(uint8_t pin)
 
 int main(int argc, char **argv)
 {
@@ -56,9 +60,9 @@ int main(int argc, char **argv)
     // Blink
     while (1)
     {
-		write_gpio(pin, 0x1);			//pin hoog maken
+		set_gpio(pin);					//pin hoog maken
 		bcm2835_delay(500);
-		write_gpio(pin, 0x0);			//pin laag maken
+		clear_gpio(pin);			//pin laag maken
 		bcm2835_delay(500);
     }
     bcm2835_close();
@@ -92,9 +96,25 @@ static void *mapmem(const char *msg, size_t size, int fd, off_t off)
 	void *map = mmap(NULL, size, (PROT_READ | PROT_WRITE), MAP_SHARED, fd, off);
 }
 
+/*
 void write_gpio(volatile uint32_t* paddr, uint32_t value)
 {
 	__sync_synchronize();
 	*paddr = value;
 	__sync_synchronize();
+}
+*/
+
+void set_gpio(uint8_t pin)
+{
+	volatile uint32_t* paddr = bcm2835_gpio + BCM2835_GPSET0 / 4 + pin / 32;
+	uint8_t shift = pin % 32;
+	bcm2835_peri_write(paddr, 1 << shift);
+}
+
+void clear_gpio(uint8_t pin)
+{
+	volatile uint32_t* paddr = gpio + BCM2835_GPCLR0 / 4 + pin / 32;
+	uint8_t shift = pin % 32;
+	bcm2835_peri_write(paddr, 1 << shift);
 }
