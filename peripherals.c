@@ -19,6 +19,7 @@
 
 //#include <bcm2835.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
