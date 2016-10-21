@@ -29,16 +29,16 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#define PERI_BASE 0x20000000
+#define PERI_BASE 0x3F000000
 #define GPIO_BASE 0x200000
 #define BCM2835_GPSET0 0x001c
 #define BCM2835_GPCLR0 0x0028
+#define GPIO_SEL 0x0004
 
 #define PIN1 17
 
-#define AANTAL_PINS 8
-
-volatile uint32_t *gpio;
+uint32_t *gpio;
+volatile uint32_t *gpio_temp;
 uint32_t *peripherals;
 uint32_t *peripherals_base = (uint32_t *) PERI_BASE;
 
@@ -82,18 +82,23 @@ void init()
 		if ((memfd = open("/dev/mem",  O_RDWR | O_SYNC)) < 0)
 		{
 			fprintf(stderr, "bcm init: geen admin. error %s", strerror(errno));
-			goto exit;
+			exit(1);
 		}
 		peripherals = mapmem("gpio",  0x01000000,  memfd, (uint32_t)peripherals_base);
 		gpio = peripherals + GPIO_BASE/4;
+		gpio_temp = gpio + GPIO_SEL / 4;
+		__sync_synchronize();
+		*gpio_temp = *gpio_temp & ~(1 << 22) & ~(1 << 23);
+		*gpio_temp = *gpio_temp | (1 << 21);
+		__sync_synchronize();
 	}
-exit:
 	return;
 }
 
 static void *mapmem(const char *msg, size_t size, int fd, off_t off)
 {
 	void *map = mmap(NULL, size, (PROT_READ | PROT_WRITE), MAP_SHARED, fd, off);
+	return map;
 }
 
 /*
@@ -107,14 +112,12 @@ void write_gpio(volatile uint32_t* paddr, uint32_t value)
 
 void set_gpio(uint8_t pin)
 {
-	volatile uint32_t* paddr = gpio + BCM2835_GPSET0 / 4 + pin / 32;
-	uint8_t shift = pin % 32;
-	bcm2835_peri_write(paddr, 1 << shift);
+	volatile uint32_t* paddr = gpio + BCM2835_GPSET0 / 4;
+	*paddr = 1 << pin;
 }
 
 void clear_gpio(uint8_t pin)
 {
-	volatile uint32_t* paddr = gpio + BCM2835_GPCLR0 / 4 + pin / 32;
-	uint8_t shift = pin % 32;
-	bcm2835_peri_write(paddr, 1 << shift);
+	volatile uint32_t* paddr = gpio + BCM2835_GPCLR0 / 4;
+	*paddr = 1 << pin;
 }
