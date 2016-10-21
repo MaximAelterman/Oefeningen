@@ -50,9 +50,9 @@ void set_gpio(uint8_t pin);
 void clear_gpio(uint8_t pin);
 
 int main(int argc, char **argv)
-{
+{/*
     if (!bcm2835_init())
-      return 1;
+      return 1;*/
 	init();
     // Set the pin to be an output
     uint8_t pin = PIN1;
