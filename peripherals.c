@@ -17,23 +17,24 @@
 // $Id: RF22.h,v 1.21 2012/05/30 01:51:25 mikem Exp $
 // Blinks on RPi Plug P1 pin 11 (which is GPIO pin 17)
 
-//#include <bcm2835.h>
 #include <stdio.h>
+#include <bcm2835.h>
 #include <stdint.h>
+#include <signal.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <sys/mman.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+
+#include <errno.h>
 
 #define PERI_BASE 0x3F000000
 #define GPIO_BASE 0x200000
 #define BCM2835_GPSET0 0x001c
 #define BCM2835_GPCLR0 0x0028
 #define GPIO_SEL 0x0004
+#define PERI_SIZE 0x01000000
 
 #define PIN1 17
 
@@ -41,11 +42,11 @@ uint32_t *gpio;
 volatile uint32_t *gpio_temp;
 uint32_t *peripherals;
 uint32_t *peripherals_base = (uint32_t *) PERI_BASE;
+uint32_t peripherals_size = PERI_SIZE;
 
 void initpins(uint8_t);
 void init();
 static void *mapmem(const char*, size_t, int, off_t);
-//void write_gpio(volatile uint32_t*, uint32_t);
 void set_gpio(uint8_t pin);
 void clear_gpio(uint8_t pin);
 
@@ -56,13 +57,13 @@ int main(int argc, char **argv)
 	init();
     // Set the pin to be an output
     uint8_t pin = PIN1;
-    initpins(pin);
+    //initpins(pin);
     // Blink
     while (1)
     {
 		set_gpio(pin);					//pin hoog maken
 		bcm2835_delay(500);
-		clear_gpio(pin);			//pin laag maken
+		clear_gpio(pin);				//pin laag maken
 		bcm2835_delay(500);
     }
     bcm2835_close();
@@ -84,7 +85,7 @@ void init()
 			fprintf(stderr, "bcm init: geen admin. error %s", strerror(errno));
 			exit(1);
 		}
-		peripherals = mapmem("gpio",  0x01000000,  memfd, (uint32_t)peripherals_base);
+		peripherals = mapmem("gpio",  peripherals_size,  memfd, (uint32_t)peripherals_base);
 		gpio = peripherals + GPIO_BASE/4;
 		gpio_temp = gpio + GPIO_SEL / 4;
 		__sync_synchronize();
@@ -94,6 +95,7 @@ void init()
 	}
 	return;
 }
+
 
 static void *mapmem(const char *msg, size_t size, int fd, off_t off)
 {
